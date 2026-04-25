@@ -4,7 +4,7 @@ import LoadingState from "../components/LoadingState";
 import ResultsSection from "../components/ResultsSection";
 
 function Home() {
-    console.log("HOME MOUNT");
+  console.log("HOME MOUNT");
 
   // ------------------------
   // State Management
@@ -15,81 +15,52 @@ function Home() {
   const [interpreted, setInterpreted] = useState([]);
   const [error, setError] = useState(null);
 
-    console.log("STATE:", { loading, results, interpreted });
-
+  console.log("STATE:", { loading, results, interpreted });
 
   // ------------------------
-  // API Call
+  // API Call (REAL BACKEND)
   // ------------------------
-const fetchRecommendations = async (userQuery) => {
-  if (!userQuery) return;
+  const fetchRecommendations = async (userQuery) => {
+    if (!userQuery) return;
 
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  try {
-    // simulate backend delay + processing time
-    await new Promise((r) => setTimeout(r, 5000));
+    try {
+      const res = await fetch("http://localhost:8000/api/recommend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: userQuery,
+        }),
+      });
 
-    // fake backend response
-    const mockData = {
-      interpreted: ["peaceful", "nature"],
-      results: [
-        {
-          name: "Kyoto",
-          country: "Japan",
-          description: "Temples, bamboo forests, and peaceful gardens.",
-          tags: ["peaceful", "nature"],
-          image: "https://source.unsplash.com/800x600/?kyoto"
-        },
-        {
-          name: "Reykjavik",
-          country: "Iceland",
-          description: "Minimalist city surrounded by wild landscapes.",
-          tags: ["nature", "cold"],
-          image: "https://source.unsplash.com/800x600/?iceland"
-        },
-        {
-          name: "Hallstatt",
-          country: "Austria",
-          description: "Quiet lakeside village in the Alps.",
-          tags: ["peaceful", "nature"],
-          image: "https://source.unsplash.com/800x600/?austria,lake"
-        },
-        {
-          name: "Madeira",
-          country: "Portugal",
-          description: "Lush island with cliffs and ocean views.",
-          tags: ["nature", "coastal"],
-          image: "https://source.unsplash.com/800x600/?madeira"
-        },
-        {
-          name: "Ubud",
-          country: "Indonesia",
-          description: "Spiritual jungle retreat with rice terraces.",
-          tags: ["peaceful", "nature"],
-          image: "https://source.unsplash.com/800x600/?ubud"
-        }
-      ]
-    };
+      if (!res.ok) {
+        throw new Error("Failed to fetch recommendations");
+      }
 
-    setResults(mockData.results);
-    setInterpreted(mockData.interpreted);
-  } catch (err) {
-    setError(err.message);
-    setResults([]);
-  } finally {
-    setLoading(false);
-  }
-};
+      const data = await res.json();
+
+      setResults(data.results || []);
+      setInterpreted(data.interpreted || []);
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+      setResults([]);
+      setInterpreted([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ------------------------
   // Handlers
   // ------------------------
   const handleSubmit = () => {
-     console.log("SUBMIT CLICKED");
-     console.log("HOME FILE:", import.meta.url);
-     fetchRecommendations(query);
+    console.log("SUBMIT CLICKED");
+    fetchRecommendations(query);
   };
 
   const handleRefine = (newQuery) => {
@@ -105,35 +76,34 @@ const fetchRecommendations = async (userQuery) => {
   };
 
   // ------------------------
-  // Render Logic (3 States)
+  // Render Logic
   // ------------------------
 
-  // 1. Loading State
-return (
-  <>
-    {loading && <LoadingState query={query} />}
+  return (
+    <>
+      {loading && <LoadingState query={query} />}
 
-    {!loading && results.length === 0 && (
-      <HeroInput
-        query={query}
-        setQuery={setQuery}
-        onSubmit={handleSubmit}
-        isLoading={loading}
-        error={error}
-      />
-    )}
+      {!loading && results.length === 0 && (
+        <HeroInput
+          query={query}
+          setQuery={setQuery}
+          onSubmit={handleSubmit}
+          isLoading={loading}
+          error={error}
+        />
+      )}
 
-    {!loading && results.length > 0 && (
-      <ResultsSection
-        query={query}
-        results={results}
-        interpretedTags={interpreted}
-        onRefine={handleRefine}
-        onReset={handleReset}
-      />
-    )}
-  </>
-);
+      {!loading && results.length > 0 && (
+        <ResultsSection
+          query={query}
+          results={results}
+          interpretedTags={interpreted}
+          onRefine={handleRefine}
+          onReset={handleReset}
+        />
+      )}
+    </>
+  );
 }
 
 export default Home;
