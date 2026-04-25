@@ -5,6 +5,13 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from  ai.voice_service import generate_speech
 
+from ai.emb import load_model, load_data, query_system
+
+import os
+from dotenv import load_dotenv
+from google import genai
+import json
+
 # ------------------------
 # App
 # ------------------------
@@ -46,47 +53,36 @@ class RecommendResponse(BaseModel):
 # Fake logic (replace later with AI)
 # ------------------------
 def fake_ai(query: str):
-    interpreted = ["peaceful", "nature"]
+    model = load_model()
+    metadata, embeddings = load_data("city_embeddings.json", "city_embeddings.npy")
+    # interpreted = ["peaceful", "nature"]
+    user_query = query
 
-    results = [
-        {
-            "name": "Kyoto",
-            "country": "Japan",
-            "description": "Temples, bamboo forests, and peaceful gardens.",
-            "tags": ["peaceful", "nature"],
-            "image": "https://source.unsplash.com/800x600/?kyoto"
-        },
-        {
-            "name": "Reykjavik",
-            "country": "Iceland",
-            "description": "Minimalist city surrounded by wild landscapes.",
-            "tags": ["nature", "cold"],
-            "image": "https://source.unsplash.com/800x600/?iceland"
-        },
-        {
-            "name": "Hallstatt",
-            "country": "Austria",
-            "description": "Quiet lakeside village in the Alps.",
-            "tags": ["peaceful", "nature"],
-            "image": "https://source.unsplash.com/800x600/?lake"
-        },
-        {
-            "name": "Madeira",
-            "country": "Portugal",
-            "description": "Lush island with cliffs and ocean views.",
-            "tags": ["nature", "coastal"],
-            "image": "https://source.unsplash.com/800x600/?madeira"
-        },
-        {
-            "name": "Ubud",
-            "country": "Indonesia",
-            "description": "Spiritual jungle retreat with rice terraces.",
-            "tags": ["peaceful", "nature"],
-            "image": "https://source.unsplash.com/800x600/?ubud"
-        }
-    ]
+    # Load env
+    load_dotenv()
+    api_key = os.getenv("GOOGLE_API_KEY")
 
-    return interpreted, results
+    client = genai.Client(api_key=api_key)
+
+    # Load prompts
+    with open("prompts.json", "r") as f:
+        prompts = json.load(f)
+
+    base_prompt = prompts["travel_intent_parser"]
+
+    # Combine prompt + user input
+    final_prompt = base_prompt + "\nUser: " + user_query
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=final_prompt
+    )
+
+    output_text = response.text.strip()["sentences"]
+
+    results = query_system(model, embeddings, metadata, output_text, k=5)
+
+    return results
 
 
 # ------------------------
@@ -94,6 +90,7 @@ def fake_ai(query: str):
 # ------------------------
 @app.post("/recommend", response_model=RecommendResponse)
 def recommend(req: RecommendRequest):
+
     interpreted, results = fake_ai(req.query)
     #generate_speech(req.query)
 
