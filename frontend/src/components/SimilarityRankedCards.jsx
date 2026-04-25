@@ -10,6 +10,7 @@ import {
   Button,
   LinearProgress,
   useTheme,
+  autocompleteClasses,
 } from '@mui/material';
 
 const clampSimilarity = (value) => {
@@ -65,6 +66,8 @@ const SimilarityRankedCards = ({ results = [], onViewDetails }) => {
         component="article"
         elevation={isTop ? 5 : 2}
         sx={{
+          maxWidth: isTop ? 480 : 380,
+          max: 'auto',
           width: '100%',
           borderRadius: 3,
           border: isTop
@@ -85,12 +88,12 @@ const SimilarityRankedCards = ({ results = [], onViewDetails }) => {
           alt={item.title}
           sx={{
             width: '100%',
-            aspectRatio: isTop ? '16 / 9' : '4 / 3',
+            aspectRatio: isTop ? '21 / 9' : '16 / 9',
             objectFit: 'cover',
           }}
         />
 
-        <CardContent>
+        <CardContent sx={{p:1.5}}>
           <Typography variant="overline" sx={{ color: theme.palette.text.secondary }}>
             Rank #{rank}
           </Typography>
@@ -135,8 +138,8 @@ const SimilarityRankedCards = ({ results = [], onViewDetails }) => {
           </Typography>
         </CardContent>
 
-        <CardActions sx={{ px: 2, pb: 2 }}>
-          <Button
+        <CardActions sx={{ px: 1.5, pb: 1.5 }}>
+          <Button size="small"
             variant={isTop ? 'contained' : 'outlined'}
             aria-label={`View details for ${item.title}`}
             onClick={() => onViewDetails?.(item)}
