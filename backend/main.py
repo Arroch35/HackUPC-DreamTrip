@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
-from  ai.voice_service import generate_speech
+from  ai.voice_service import transcribe_speech
 
 from ai.emb import load_model, load_data, query_system
 
@@ -91,29 +91,24 @@ def fake_ai(query: str):
 @app.post("/recommend", response_model=RecommendResponse)
 def recommend(req: RecommendRequest):
 
-    interpreted, results = fake_ai(req.query)
-    #generate_speech(req.query)
+    results = fake_ai(req.query)
 
     return {
-        "interpreted": interpreted,
         "results": results
     }
 
 @app.post("/recommend-audio")
 async def recommend_audio(file: UploadFile = File(...)):
     print("🔥 AUDIO ENDPOINT HIT")
-
+    #transcribe_speech
     try:
         audio_bytes = await file.read()
         print("📦 Received bytes:", len(audio_bytes))
+        text=transcribe_speech(audio_bytes)
 
-        transcript = "nature peaceful place"
-
-        interpreted, results = fake_ai(transcript)
+        results = fake_ai(text)["text"]
 
         response = {
-            "query": transcript,
-            "interpreted": interpreted,
             "results": results
         }
 

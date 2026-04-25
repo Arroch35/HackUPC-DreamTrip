@@ -12,7 +12,7 @@ import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from ai.config import CORS_ORIGINS
+from backend.ai.config import CORS_ORIGINS
 from ai.schemas import (
     IntentPlanRequest, IntentPlanResponse,
     IntentParseRequest, IntentParseResponse,
@@ -22,7 +22,7 @@ from ai.schemas import (
     IntentVector, QueryPlan,
 )
 from ai.orchestrator import run_pipeline, run_reflection, run_query_plan
-from ai.voice_routes import router as voice_router
+from backend.ai.voice_routes import router as voice_router
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -182,5 +182,5 @@ async def pipeline(req: PipelineRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    from ai.config import SERVER_PORT
+    from backend.ai.config import SERVER_PORT
     uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)
