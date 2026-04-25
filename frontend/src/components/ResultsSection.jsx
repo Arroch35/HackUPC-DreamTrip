@@ -2,18 +2,164 @@ import React from 'react';
 import {
   Box,
   Container,
-  Grid,
   Typography,
   Chip,
   Button,
-  useTheme,
+  Card,
+  CardMedia,
+  CardContent,
 } from '@mui/material';
-import { RotateLeft } from '@mui/icons-material';
-import DestinationCard from './DestinationCard';
+import { Refresh } from '@mui/icons-material';
 
-const ResultsSection = ({ query, results, interpretedTags, onRefine, onReset }) => {
-  const theme = useTheme();
+const buildImageUrl = (name, seed = 1) => {
+  const safeName = encodeURIComponent(name || 'travel');
+  return `https://source.unsplash.com/1200x700/?${safeName},travel&sig=${seed}`;
+};
 
+const buildFallbackImageUrl = (name, seed = 1) => {
+  const safeName = encodeURIComponent(name || 'destination');
+  return `https://picsum.photos/seed/${safeName}-${seed}/1200/700`;
+};
+
+const ResultImage = ({ primarySrc, fallbackSrc, alt, sx }) => {
+  const [currentSrc, setCurrentSrc] = React.useState(primarySrc);
+  const [usedFallback, setUsedFallback] = React.useState(false);
+
+  React.useEffect(() => {
+    setCurrentSrc(primarySrc);
+    setUsedFallback(false);
+  }, [primarySrc]);
+
+  return (
+    <CardMedia
+      component="img"
+      image={currentSrc}
+      alt={alt}
+      onError={() => {
+        if (!usedFallback) {
+          setCurrentSrc(fallbackSrc);
+          setUsedFallback(true);
+        }
+      }}
+      sx={sx}
+    />
+  );
+};
+
+const DestinationResultCard = ({ destination, featured = false, onRefine, imageSeed = 1 }) => {
+  const name = destination?.name || destination?.title || 'Dream destination';
+  const description = destination?.description || 'A place where your dreams meet reality.';
+  const imageUrl = destination?.image || buildImageUrl(name, imageSeed);
+  const fallbackImageUrl = buildFallbackImageUrl(name, imageSeed);
+  const priceLabel = destination?.price ? `From $${destination.price}` : null;
+
+  return (
+    <Card
+      sx={{
+        height: '100%',
+        borderRadius: '28px',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: featured ? 'column' : 'row',
+        boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          transform: 'translateY(-6px)',
+          boxShadow: '0 18px 40px rgba(15, 23, 42, 0.12)',
+        },
+      }}
+    >
+      <Box
+        sx={{
+          width: featured ? '100%' : '42%',
+          minHeight: featured
+            ? { xs: 150, sm: 165, md: 180 }
+            : { xs: 130, sm: 150, md: 160 },
+          flexShrink: 0,
+          position: 'relative',
+        }}
+      >
+        <ResultImage
+          primarySrc={imageUrl}
+          fallbackSrc={fallbackImageUrl}
+          alt={name}
+          sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+
+        {featured && (
+          <Chip
+            label="Best Match"
+            color="secondary"
+            sx={{
+              position: 'absolute',
+              top: 14,
+              left: 14,
+              fontWeight: 700,
+            }}
+          />
+        )}
+      </Box>
+
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          p: featured ? { xs: 1.4, sm: 1.8 } : { xs: 1.5, sm: 1.4 },
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1.2, mb: 1.2 }}>
+          <Typography
+            variant={featured ? 'h5' : 'h6'}
+            sx={{
+              fontWeight: 700,
+              lineHeight: 1.2,
+              fontSize: featured ? { xs: '1rem', sm: '1.1rem' } : { xs: '0.95rem', sm: '0.92rem' },
+            }}
+          >
+            {name}
+          </Typography>
+          {priceLabel && (
+            <Chip
+              label={priceLabel}
+              color="secondary"
+              variant="filled"
+              size={featured ? 'medium' : 'small'}
+              sx={{ fontWeight: 600 }}
+            />
+          )}
+        </Box>
+
+        <Typography
+          variant="body2"
+          sx={{
+            color: '#475569',
+            mb: 1.2,
+            lineHeight: 1.45,
+            flexGrow: 1,
+            display: '-webkit-box',
+            WebkitLineClamp: 1,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            fontSize: featured ? '0.92rem' : '0.84rem',
+          }}
+        >
+          {description}
+        </Typography>
+
+        <Button
+          variant="contained"
+          onClick={() => onRefine(name)}
+          sx={{ alignSelf: 'flex-start', minHeight: 36, px: 2.2, py: 0.8, fontSize: '0.86rem' }}
+        >
+          Explore →
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
+const ResultsSection = ({ query, results, interpretedTags, error, onReset }) => {
   if (!results || results.length === 0) {
     return null;
   }
@@ -23,237 +169,109 @@ const ResultsSection = ({ query, results, interpretedTags, onRefine, onReset }) 
   const secondPair = results.slice(3, 5);
 
   return (
-    <Box
-      sx={{
-        py: { xs: 6, md: 8 },
-        background: 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: '-30%',
-          left: '-20%',
-          width: '600px',
-          height: '600px',
-          borderRadius: '50%',
-          background: 'rgba(96, 165, 250, 0.08)',
-          pointerEvents: 'none',
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          bottom: '-30%',
-          right: '-20%',
-          width: '500px',
-          height: '500px',
-          borderRadius: '50%',
-          background: 'rgba(37, 99, 235, 0.06)',
-          pointerEvents: 'none',
-        },
-      }}
-    >
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-        <Box sx={{ maxWidth: { xs: '100%', lg: '100%' }, mx: 'auto' }}>
-          
-          {/* Header Section */}
-          <Box 
-            sx={{ 
-              mb: { xs: 4, lg: 3.5 }, 
-              animation: 'fadeInDown 0.8s ease-out', 
-              textAlign: 'center',
-              '@keyframes fadeInDown': {
-                from: { opacity: 0, transform: 'translateY(-30px)' },
-                to: { opacity: 1, transform: 'translateY(0)' },
-              },
-            }}
+    <Box sx={{ py: { xs: 5, md: 6 }, backgroundColor: '#faf9f6' }}>
+      <Container maxWidth="lg">
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: { xs: 700, lg: 960 },
+            mx: 'auto',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            mb: { xs: 1, lg: 0.8 },
+          }}
+        >
+          <Button
+            variant="outlined"
+            startIcon={<Refresh />}
+            onClick={onReset}
+            sx={{ borderRadius: '999px', px: 2.4, py: 0.6 }}
           >
-            {/* Decorative gradient bar */}
+            Start Over
+          </Button>
+        </Box>
+
+        <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 } }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1.5 }}>
+            Based on your search: "{query}"
+          </Typography>
+
+          {interpretedTags && interpretedTags.length > 0 && (
             <Box
               sx={{
-                width: '80px',
-                height: '4px',
-                background: 'linear-gradient(90deg, #60a5fa, #2563eb)',
-                borderRadius: '2px',
-                mx: 'auto',
-                mb: 2,
-                animation: 'expandWidth 0.8s ease-out',
-                '@keyframes expandWidth': {
-                  from: { width: 0, opacity: 0 },
-                  to: { width: 80, opacity: 1 },
-                },
-              }}
-            />
-            
-            {/* Main Title */}
-            <Typography
-              variant="h2"
-              sx={{
-                fontWeight: 800,
-                background: 'linear-gradient(135deg, #0f172a 0%, #1e40af 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                mb: 1.5,
-                fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
+                display: 'flex',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                gap: 1.5,
+                mb: 3,
               }}
             >
-              Places that match your vibe
-            </Typography>
-
-            {/* Original Query Tag */}
-            <Box sx={{ mb: 2.5 }}>
-              <Chip
-                label={`${query}`}
-                sx={{
-                  backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                  color: '#2563eb',
-                  fontWeight: 600,
-                  fontSize: '0.9rem',
-                  height: '40px',
-                  borderRadius: '20px',
-                }}
-              />
+              {interpretedTags.map((tag, index) => (
+                <Chip
+                  key={`${tag}-${index}`}
+                  label={tag}
+                  variant="outlined"
+                  color="secondary"
+                  sx={{ fontWeight: 600 }}
+                />
+              ))}
             </Box>
+          )}
 
-            {/* Interpreted Tags */}
-            {interpretedTags && interpretedTags.length > 0 && (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, justifyContent: 'center' }}>
-                {interpretedTags.map((tag, index) => (
-                  <Chip
-                    key={index}
-                    label={tag}
-                    variant="outlined"
-                    sx={{
-                      borderColor: '#2563eb',
-                      color: '#2563eb',
-                      fontWeight: 600,
-                      height: '36px',
-                      borderRadius: '18px',
-                      backgroundColor: 'rgba(37, 99, 235, 0.05)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        backgroundColor: 'rgba(37, 99, 235, 0.15)',
-                        transform: 'translateY(-2px)',
-                      },
-                    }}
-                  />
-                ))}
-              </Box>
-            )}
-          </Box>
-
-          {/* Featured Top Match - NOW LARGER */}
-          <Box 
-            sx={{ 
-              mb: { xs: 3, lg: 2 }, 
-              display: 'flex', 
-              justifyContent: 'center',
-            }}
-          >
-            <Box
-              sx={{
-                width: '100%',
-                maxWidth: { xs: '100%', lg: 980 },  // CHANGED: 780 → 980 (25% larger)
-              }}
-            >
-              <DestinationCard destination={featuredResult} variant="featured" />
-            </Box>
-          </Box>
-
-          {/* Row 2: Two Supporting Matches (keep smaller) */}
-          <Grid 
-            container 
-            spacing={{ xs: 2, lg: 1.5 }} 
-            sx={{ 
-              mb: { xs: 2, lg: 1.5 }, 
-              alignItems: 'stretch', 
-              justifyContent: 'center'
-            }}
-          >
-            {firstPair.map((destination, index) => (
-              <Grid
-                size={{ xs: 12, sm: 6, md: 6 }}
-                key={`pair-one-${index}`}
-                sx={{ display: 'flex' }}
-              >
-                <DestinationCard destination={destination} />
-              </Grid>
-            ))}
-          </Grid>
-
-          {/* Row 3: Two More Supporting Matches (keep smaller) */}
-          <Grid 
-            container 
-            spacing={{ xs: 2, lg: 1.5 }} 
-            sx={{ 
-              mb: { xs: 4, lg: 3.5 }, 
-              alignItems: 'stretch', 
-              justifyContent: 'center'
-            }}
-          >
-            {secondPair.map((destination, index) => (
-              <Grid
-                size={{ xs: 12, sm: 6, md: 6 }}
-                key={`pair-two-${index}`}
-                sx={{ display: 'flex' }}
-              >
-                <DestinationCard destination={destination} />
-              </Grid>
-            ))}
-          </Grid>
-
-          {/* Action Buttons */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 2,
-              flexWrap: 'wrap',
-            }}
-          >
-            <Button
-              variant="contained"
-              onClick={onReset}
-              startIcon={<RotateLeft />}
-              sx={{
-                borderRadius: '40px',
-                px: 5,
-                py: 1.5,
-                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                boxShadow: '0 8px 20px rgba(37, 99, 235, 0.3)',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 12px 28px rgba(37, 99, 235, 0.4)',
-                },
-              }}
-            >
-              Search again
-            </Button>
-          </Box>
-
-          {/* Refinement Hint */}
-          <Box
-            sx={{
-              textAlign: 'center',
-              mt: { xs: 5, lg: 4 },
-              pt: { xs: 4, lg: 3 },
-              borderTop: '1px solid rgba(37, 99, 235, 0.15)',
-            }}
-          >
+          {error && (
             <Typography
               variant="body2"
               sx={{
-                color: '#64748b',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 1,
+                mt: 2,
+                color: '#b91c1c',
+                backgroundColor: 'rgba(254, 226, 226, 0.9)',
+                border: '1px solid #fecaca',
+                display: 'inline-block',
+                px: 2,
+                py: 0.8,
+                borderRadius: '999px',
+                fontWeight: 500,
               }}
             >
-              Not quite what you're looking for? Try refining your search or describe a different feeling.
+              {error}
             </Typography>
+          )}
+        </Box>
+
+        <Box sx={{ mb: { xs: 2.5, lg: 1.5 }, display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ width: '100%', maxWidth: { xs: 640, lg: 780 } }}>
+            <DestinationResultCard destination={featuredResult} featured imageSeed={1} />
+          </Box>
+        </Box>
+
+        <Box sx={{ width: '100%', maxWidth: { xs: 700, lg: 960 }, mx: 'auto' }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gap: { xs: 1.6, lg: 1.25 },
+              mb: { xs: 1.6, lg: 1.25 },
+            }}
+          >
+            {firstPair.map((destination, index) => (
+              <Box key={`pair-one-${index}`} sx={{ display: 'flex', minWidth: 0 }}>
+                <DestinationResultCard destination={destination} imageSeed={index + 2} />
+              </Box>
+            ))}
+          </Box>
+
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gap: { xs: 1.6, lg: 1.25 },
+            }}
+          >
+            {secondPair.map((destination, index) => (
+              <Box key={`pair-two-${index}`} sx={{ display: 'flex', minWidth: 0 }}>
+                <DestinationResultCard destination={destination} imageSeed={index + 4} />
+              </Box>
+            ))}
           </Box>
         </Box>
       </Container>
