@@ -4,7 +4,6 @@ import {
   Container,
   Grid,
   Card,
-  CardMedia,
   CardContent,
   Typography,
   Skeleton,
@@ -28,8 +27,11 @@ const SkeletonCard = ({ featured = false }) => {
       <Skeleton
         variant="rectangular"
         width="100%"
-        height={featured ? 320 : 250}
-        sx={{ backgroundColor: '#e2e8f0' }}
+        sx={{
+          aspectRatio: featured ? '16 / 9' : '4 / 3',
+          height: 'auto',
+          backgroundColor: '#e2e8f0',
+        }}
       />
       <CardContent sx={{ p: 3 }}>
         <Skeleton variant="text" width="70%" height={32} sx={{ mb: 1 }} />
@@ -57,6 +59,7 @@ const LoadingState = ({ query }) => {
       }}
     >
       <Container maxWidth="lg">
+        <Box sx={{ maxWidth: 1120, mx: 'auto' }}>
         {/* Loading Header */}
         <Box sx={{ textAlign: 'center', mb: 6 }}>
           <Typography
@@ -92,15 +95,15 @@ const LoadingState = ({ query }) => {
 
         {/* Featured Skeleton */}
         <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
-          <Box sx={{ width: '100%', maxWidth: 820 }}>
+          <Box sx={{ width: '100%', maxWidth: 780 }}>
             <SkeletonCard featured />
           </Box>
         </Box>
 
-        {/* Four Supporting Skeletons */}
-        <Grid container spacing={3}>
-          {[1, 2, 3, 4].map((index) => (
-            <Grid item xs={12} sm={6} md={6} key={index}>
+        {/* Row 2: Two Supporting Skeletons */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          {[1, 2].map((index) => (
+            <Grid size={{ xs: 12, sm: 6, md: 6 }} key={`row-two-${index}`}>
               <Box
                 sx={{
                   animation: 'slideUp 0.6s ease-out',
@@ -123,6 +126,34 @@ const LoadingState = ({ query }) => {
             </Grid>
           ))}
         </Grid>
+
+        {/* Row 3: Two More Supporting Skeletons */}
+        <Grid container spacing={3}>
+          {[1, 2].map((index) => (
+            <Grid size={{ xs: 12, sm: 6, md: 6 }} key={`row-three-${index}`}>
+              <Box
+                sx={{
+                  animation: 'slideUp 0.6s ease-out',
+                  animationDelay: `${index * 0.08 + 0.16}s`,
+                  animationFillMode: 'both',
+                  '@keyframes slideUp': {
+                    from: {
+                      opacity: 0,
+                      transform: 'translateY(24px)',
+                    },
+                    to: {
+                      opacity: 1,
+                      transform: 'translateY(0)',
+                    },
+                  },
+                }}
+              >
+                <SkeletonCard />
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+        </Box>
       </Container>
     </Box>
   );

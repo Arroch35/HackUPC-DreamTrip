@@ -7,6 +7,10 @@ import RefinementChips from '../components/RefinementChips';
 
 const previewResults = [
   {
+    id: 1,
+    title: 'Lauterbrunnen, Switzerland',
+    similarity: 92,
+    summary: 'A high-confidence match for peaceful mountain scenery, waterfalls, and low crowd intensity.',
     name: 'Lauterbrunnen',
     country: 'Switzerland',
     description:
@@ -16,6 +20,10 @@ const previewResults = [
       'https://images.unsplash.com/photo-1576426863848-c21f53c60b19?auto=format&fit=crop&w=1200&q=80',
   },
   {
+    id: 2,
+    title: 'Azores, Portugal',
+    similarity: 84,
+    summary: 'Strong match for nature-rich, calm escapes with scenic viewpoints and relaxed pace.',
     name: 'Azores',
     country: 'Portugal',
     description:
@@ -25,6 +33,10 @@ const previewResults = [
       'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1200&q=80',
   },
   {
+    id: 3,
+    title: 'Kotor Bay, Montenegro',
+    similarity: 78,
+    summary: 'Balanced match for calm waterfront energy with mountain framing and historic ambiance.',
     name: 'Kotor Bay',
     country: 'Montenegro',
     description:
@@ -34,6 +46,10 @@ const previewResults = [
       'https://images.unsplash.com/photo-1520958978572-3fc8f9f8a169?auto=format&fit=crop&w=1200&q=80',
   },
   {
+    id: 4,
+    title: 'Nikko, Japan',
+    similarity: 69,
+    summary: 'Moderate match for tranquil forests and cultural depth in a slower, reflective setting.',
     name: 'Nikko',
     country: 'Japan',
     description:
@@ -43,6 +59,10 @@ const previewResults = [
       'https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=1200&q=80',
   },
   {
+    id: 5,
+    title: 'Snaefellsnes, Iceland',
+    similarity: 58,
+    summary: 'Lower but relevant match for dramatic open landscapes and atmospheric, remote nature.',
     name: 'Snaefellsnes',
     country: 'Iceland',
     description:

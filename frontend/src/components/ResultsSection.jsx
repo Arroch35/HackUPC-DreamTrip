@@ -19,7 +19,8 @@ const ResultsSection = ({ query, results, interpretedTags, onRefine, onReset }) 
   }
 
   const featuredResult = results[0];
-  const secondaryResults = results.slice(1, 5);
+  const firstPair = results.slice(1, 3);
+  const secondPair = results.slice(3, 5);
 
   return (
     <Box
@@ -29,10 +30,11 @@ const ResultsSection = ({ query, results, interpretedTags, onRefine, onReset }) 
       }}
     >
       <Container maxWidth="lg">
+        <Box sx={{ maxWidth: 980, mx: 'auto' }}>
         {/* Header Section */}
-        <Box sx={{ mb: 6, animation: 'slideUp 0.6s ease-out' }}>
+        <Box sx={{ mb: 6, animation: 'slideUp 0.6s ease-out', textAlign: 'center' }}>
           {/* Main Title */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
             <Box
               sx={{
                 width: '6px',
@@ -53,7 +55,7 @@ const ResultsSection = ({ query, results, interpretedTags, onRefine, onReset }) 
           </Box>
 
           {/* Original Query */}
-          <Box sx={{ ml: 6, mb: 3 }}>
+          <Box sx={{ mb: 3 }}>
             <Typography
               variant="body1"
               sx={{
@@ -67,7 +69,7 @@ const ResultsSection = ({ query, results, interpretedTags, onRefine, onReset }) 
 
           {/* Interpreted Tags */}
           {interpretedTags && interpretedTags.length > 0 && (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, ml: 6 }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, justifyContent: 'center' }}>
               {interpretedTags.map((tag, index) => (
                 <Chip
                   key={index}
@@ -102,7 +104,7 @@ const ResultsSection = ({ query, results, interpretedTags, onRefine, onReset }) 
           <Box
             sx={{
               width: '100%',
-              maxWidth: 820,
+              maxWidth: 780,
               animation: 'slideUp 0.6s ease-out 0.05s both',
             }}
           >
@@ -110,17 +112,39 @@ const ResultsSection = ({ query, results, interpretedTags, onRefine, onReset }) 
           </Box>
         </Box>
 
-        {/* Four Supporting Matches */}
-        <Grid container spacing={3} sx={{ mb: 8 }}>
-          {secondaryResults.map((destination, index) => (
+        {/* Row 2: Two Supporting Matches */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          {firstPair.map((destination, index) => (
             <Grid
-              item
-              xs={12}
-              sm={6}
-              md={6}
-              key={index}
+              size={{ xs: 12, sm: 6, md: 6 }}
+              key={`pair-one-${index}`}
               sx={{
                 animation: `slideUp 0.6s ease-out ${index * 0.1 + 0.15}s both`,
+                '@keyframes slideUp': {
+                  from: {
+                    opacity: 0,
+                    transform: 'translateY(24px)',
+                  },
+                  to: {
+                    opacity: 1,
+                    transform: 'translateY(0)',
+                  },
+                },
+              }}
+            >
+              <DestinationCard destination={destination} />
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Row 3: Two More Supporting Matches */}
+        <Grid container spacing={3} sx={{ mb: 8 }}>
+          {secondPair.map((destination, index) => (
+            <Grid
+              size={{ xs: 12, sm: 6, md: 6 }}
+              key={`pair-two-${index}`}
+              sx={{
+                animation: `slideUp 0.6s ease-out ${index * 0.1 + 0.35}s both`,
                 '@keyframes slideUp': {
                   from: {
                     opacity: 0,
@@ -194,6 +218,7 @@ const ResultsSection = ({ query, results, interpretedTags, onRefine, onReset }) 
           >
             Not quite what you're looking for? Try refining your search or describe a different feeling.
           </Typography>
+        </Box>
         </Box>
       </Container>
     </Box>

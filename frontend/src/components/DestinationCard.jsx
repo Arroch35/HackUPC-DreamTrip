@@ -60,15 +60,17 @@ const DestinationCard = ({ destination, onLike, variant = 'default' }) => {
         sx={{
           position: 'relative',
           overflow: 'hidden',
-          height: isFeatured ? '320px' : '250px',
+          width: '100%',
+          aspectRatio: isFeatured ? '3 / 2' : '4 / 3',
         }}
       >
         <CardMedia
           component="img"
-          height={isFeatured ? '320' : '250'}
           image={destination.image}
           alt={destination.name}
           sx={{
+            width: '100%',
+            height: '100%',
             objectFit: 'cover',
             transition: 'transform 0.4s ease-out',
             transform: isHovered ? 'scale(1.08)' : 'scale(1)',
@@ -137,14 +139,14 @@ const DestinationCard = ({ destination, onLike, variant = 'default' }) => {
           flexGrow: 1,
           display: 'flex',
           flexDirection: 'column',
-          p: isFeatured ? 3.5 : 3,
+          p: isFeatured ? 3.25 : 3,
         }}
       >
         {/* Title with Location */}
         <Box sx={{ mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
             <Typography
-              variant={isFeatured ? 'h4' : 'h5'}
+              variant="h5"
               sx={{ fontWeight: 700, color: '#0f172a' }}
             >
               {destination.name}
@@ -166,7 +168,7 @@ const DestinationCard = ({ destination, onLike, variant = 'default' }) => {
             mb: 3,
             lineHeight: 1.6,
             display: '-webkit-box',
-            WebkitLineClamp: isFeatured ? 4 : 3,
+            WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
           }}
