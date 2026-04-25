@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useRef } from 'react';
 import {
   Box,
   Container,
@@ -6,17 +6,106 @@ import {
   Button,
   InputBase,
 } from '@mui/material';
+import MicIcon from '@mui/icons-material/Mic';
 
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80';
 
 const HeroInput = ({ onSubmit, isLoading, query, setQuery, error }) => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
+
+  const mediaRecorderRef = useRef(null);
+  const chunksRef = useRef([]);
+
+  // -------------------------
+  // TEXT + AUDIO SUBMIT (ONE ONLY)
+  // -------------------------
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      onSubmit(query);
+    submitQuery(query, null);
+  };
+
+const submitQuery = async (textOverride = null, audioOverride = null) => {
+  try {
+    // 🎤 AUDIO FLOW
+    if (audioOverride) {
+      const formData = new FormData();
+      formData.append("file", audioOverride, "recording.webm");
+
+      const res = await fetch("http://localhost:8000/recommend-audio", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      const newQuery = data.query || "";
+
+      if (newQuery) {
+        setQuery(newQuery);
+        onSubmit(newQuery);
+      }
+
+      return;
+    }
+
+    // ✍️ TEXT FLOW
+    const finalQuery = textOverride ?? query;
+
+    if (finalQuery && finalQuery.trim().length > 0) {
+      onSubmit(finalQuery); // 🔥 ALWAYS pass query up
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+  // -------------------------
+  // MIC LOGIC
+  // -------------------------
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      const recorder = new MediaRecorder(stream);
+      chunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+
+        setAudioBlob(blob);
+
+        // 🔥 DIRECT SUBMIT (no waiting for React state)
+        submitQuery(null, blob);
+      };
+
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Mic error:', err);
+      alert('Microphone access denied or not supported.');
     }
   };
+
+  const stopRecording = () => {
+  if (mediaRecorderRef.current) {
+    mediaRecorderRef.current.stop();
+    setIsRecording(false);
+  }
+};
+
+  const handleMicClick = () => {
+  if (isRecording) stopRecording();
+  else startRecording();
+};
 
   return (
     <Box
@@ -31,107 +120,79 @@ const HeroInput = ({ onSubmit, isLoading, query, setQuery, error }) => {
           ')',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        position: 'relative',
-        overflow: 'hidden',
       }}
     >
       <Container maxWidth="md">
-        <Box
-          sx={{
-            textAlign: 'center',
-            animation: 'fadeIn 0.9s ease-out',
-          }}
-        >
-          <Typography
-            variant="h1"
-            sx={{
-              color: '#ffffff',
-              textShadow: '0 12px 36px rgba(15, 23, 42, 0.4)',
-              mb: 2,
-            }}
-          >
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h1" sx={{ mb: 2 }}>
             Your Dream Trip Starts Here
           </Typography>
-          <Typography
-            variant="h5"
-            sx={{
-              color: 'rgba(255, 255, 255, 0.9)',
-              fontWeight: 500,
-              mb: 4,
-            }}
-          >
+
+          <Typography variant="h5" sx={{ mb: 4 }}>
             Tell us what you love — we&apos;ll find the perfect escape.
           </Typography>
 
+          {/* FORM */}
           <Box
             component="form"
             onSubmit={handleSubmit}
             sx={{
               display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: { xs: 2, sm: 1.5 },
+              gap: 1.5,
               alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#ffffff',
+              backgroundColor: '#fff',
               borderRadius: '999px',
-              p: { xs: 1.5, sm: 1 },
-              boxShadow: '0 24px 60px rgba(15, 23, 42, 0.25)',
-              animation: 'slideUp 0.9s ease-out 0.2s both',
+              p: 1,
             }}
           >
             <InputBase
               fullWidth
-              placeholder="e.g., 'A sunny beach with great food' or 'Mountains and adventure'"
+              placeholder="Describe your dream trip..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               disabled={isLoading}
-              sx={{
-                px: { xs: 2, sm: 3 },
-                py: { xs: 1.25, sm: 1 },
-                fontSize: '1rem',
-                color: '#0f172a',
-              }}
-              inputProps={{
-                'aria-label': 'Search your dream trip',
-              }}
             />
+
             <Button
               type="submit"
               variant="contained"
-              disabled={isLoading || !query.trim()}
+              disabled={isLoading}
               sx={{
-                px: { xs: 4, sm: 4.5 },
-                py: 1.5,
-                whiteSpace: 'nowrap',
                 borderRadius: '999px',
-                minWidth: { xs: '100%', sm: '200px' },
-                background: 'linear-gradient(135deg, #60a5fa 0%, #2563eb 100%)',
-                boxShadow: '0 16px 30px rgba(37, 99, 235, 0.35)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 24px 40px rgba(37, 99, 235, 0.4)',
-                },
+                px: 4,
+                background: 'linear-gradient(135deg, #60a5fa, #2563eb)',
               }}
             >
-              Find my destination
+              Find
             </Button>
           </Box>
 
+          {/* MIC BUTTON (NOT SUBMIT) */}
+          <Button
+            onClick={handleMicClick}
+            sx={{
+              mt: 3,
+              width: 55,
+              height: 55,
+              borderRadius: '50%',
+              background: isRecording
+                ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+                : 'linear-gradient(135deg, #00D4FF, #3B82F6)',
+              color: '#fff',
+            }}
+          >
+            <MicIcon />
+          </Button>
+
+          {/* STATES */}
+          {isRecording && (
+            <Typography sx={{ mt: 2, color: '#00D4FF' }}>
+              🎤 Recording...
+            </Typography>
+          )}
+
           {error && (
-            <Typography
-              variant="body2"
-              sx={{
-                mt: 2,
-                color: '#fee2e2',
-                backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                display: 'inline-block',
-                px: 2,
-                py: 0.75,
-                borderRadius: '999px',
-              }}
-            >
+            <Typography sx={{ mt: 2, color: '#f87171' }}>
               {error}
             </Typography>
           )}

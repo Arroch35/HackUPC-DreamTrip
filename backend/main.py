@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 from typing import List
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+from  ai.voice_service import generate_speech
 
 # ------------------------
 # App
@@ -94,12 +95,38 @@ def fake_ai(query: str):
 @app.post("/recommend", response_model=RecommendResponse)
 def recommend(req: RecommendRequest):
     interpreted, results = fake_ai(req.query)
+    #generate_speech(req.query)
 
     return {
         "interpreted": interpreted,
         "results": results
     }
 
+@app.post("/recommend-audio")
+async def recommend_audio(file: UploadFile = File(...)):
+    print("🔥 AUDIO ENDPOINT HIT")
+
+    try:
+        audio_bytes = await file.read()
+        print("📦 Received bytes:", len(audio_bytes))
+
+        transcript = "nature peaceful place"
+
+        interpreted, results = fake_ai(transcript)
+
+        response = {
+            "query": transcript,
+            "interpreted": interpreted,
+            "results": results
+        }
+
+        print("✅ RETURNING:", response)
+
+        return response
+
+    except Exception as e:
+        print("❌ ERROR:", e)
+        raise e
 
 # ------------------------
 # RUN SERVER (your requested style)
