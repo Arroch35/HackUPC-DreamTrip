@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import httpx
 import logging
-from backend.ai.config import ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID, ELEVENLABS_MODEL_ID
+from .config import ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID, ELEVENLABS_MODEL_ID
 
 log = logging.getLogger(__name__)
 
