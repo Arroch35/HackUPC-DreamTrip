@@ -224,3 +224,12 @@ tensorboard/
 run.sh
 
 debug*/
+
+# Frontend Development Documentation
+# These files are for development reference and should not be in production
+frontend/COMPONENT_DOCS.md
+frontend/FILE_INDEX.md
+frontend/API_DATA_STRUCTURES.md
+frontend/IMPLEMENTATION_CHECKLIST.md
+frontend/QUICK_START.md
+frontend/PROJECT_SUMMARY.md
