@@ -9,18 +9,20 @@ import {
 } from '@mui/material';
 import { Mic } from '@mui/icons-material';
 
-const HeroInput = ({ onSubmit, isLoading }) => {
-  const [query, setQuery] = useState('');
+const HeroInput = ({ onSubmit, isLoading, query, setQuery }) => {
+  // DELETE THIS LINE: const [query, setQuery] = useState(''); 
   const theme = useTheme();
 
   const handleInputChange = (e) => {
-    setQuery(e.target.value);
+    setQuery(e.target.value); // This now updates the state in Home.jsx
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      onSubmit(query);
+      // You don't even need to pass query here if handleSubmit 
+      // in Home already uses the parent state, but it's fine as is.
+      onSubmit(query); 
     }
   };
 
