@@ -22,12 +22,14 @@ function Home() {
   // ------------------------
   const fetchRecommendations = async (userQuery) => {
     if (!userQuery) return;
+    const startedAt = Date.now();
+    const MIN_LOADING_MS = 700;
 
     setLoading(true);
     setError(null);
 
     try {
-      const res = await fetch("http://localhost:8000/api/recommend", {
+      const res = await fetch("/api/recommend", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,7 +40,7 @@ function Home() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to fetch recommendations");
+        throw new Error("Could not fetch destinations right now. Please try again.");
       }
 
       const data = await res.json();
@@ -47,10 +49,18 @@ function Home() {
       setInterpreted(data.interpreted || []);
     } catch (err) {
       console.error(err);
-      setError(err.message);
-      setResults([]);
-      setInterpreted([]);
+      if (err?.name === "TypeError") {
+        setError("Cannot reach the recommendations server. Make sure backend is running on port 8000.");
+      } else {
+        setError(err.message || "Failed to load destinations. Please try again.");
+      }
     } finally {
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < MIN_LOADING_MS) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, MIN_LOADING_MS - elapsed);
+        });
+      }
       setLoading(false);
     }
   };
@@ -98,6 +108,7 @@ function Home() {
           query={query}
           results={results}
           interpretedTags={interpreted}
+          error={error}
           onRefine={handleRefine}
           onReset={handleReset}
         />

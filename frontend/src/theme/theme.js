@@ -4,57 +4,63 @@ const getTheme = () => createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#2563eb', // Sky blue
+      main: '#3b82f6',
       light: '#60a5fa',
-      dark: '#1e40af',
+      dark: '#2563eb',
     },
     secondary: {
-      main: '#0f172a', // Deep blue
-      light: '#1e293b',
-      dark: '#0c0f19',
+      main: '#f59e0b',
+      light: '#fbbf24',
+      dark: '#d97706',
     },
     background: {
-      default: '#f8fafc', // Very light blue
+      default: '#faf9f6',
       paper: '#ffffff',
     },
     text: {
       primary: '#0f172a',
-      secondary: '#64748b',
+      secondary: '#475569',
     },
     divider: '#e2e8f0',
   },
   typography: {
-    fontFamily: '"Segoe UI", "Helvetica Neue", sans-serif',
+    fontFamily: '"Inter", "Segoe UI", "Helvetica Neue", sans-serif',
     h1: {
-      fontSize: '3rem',
-      fontWeight: 700,
+      fontFamily: '"Poppins", "Inter", sans-serif',
+      fontSize: '3.25rem',
+      fontWeight: 800,
       letterSpacing: '-0.02em',
       lineHeight: 1.2,
     },
     h2: {
-      fontSize: '2.25rem',
-      fontWeight: 700,
+      fontFamily: '"Poppins", "Inter", sans-serif',
+      fontSize: '2.5rem',
+      fontWeight: 800,
       letterSpacing: '-0.01em',
       lineHeight: 1.3,
     },
     h3: {
-      fontSize: '1.875rem',
-      fontWeight: 600,
+      fontFamily: '"Poppins", "Inter", sans-serif',
+      fontSize: '2rem',
+      fontWeight: 700,
       lineHeight: 1.4,
     },
     h4: {
-      fontSize: '1.5rem',
-      fontWeight: 600,
+      fontFamily: '"Poppins", "Inter", sans-serif',
+      fontSize: '1.625rem',
+      fontWeight: 700,
       lineHeight: 1.4,
     },
     h5: {
+      fontFamily: '"Poppins", "Inter", sans-serif',
       fontSize: '1.25rem',
-      fontWeight: 600,
+      fontWeight: 700,
       lineHeight: 1.5,
     },
     h6: {
+      fontFamily: '"Poppins", "Inter", sans-serif',
       fontSize: '1rem',
-      fontWeight: 600,
+      fontWeight: 700,
       lineHeight: 1.5,
     },
     body1: {
@@ -76,8 +82,10 @@ const getTheme = () => createTheme({
           textTransform: 'none',
           fontWeight: 600,
           fontSize: '1rem',
-          borderRadius: '16px',
+          fontFamily: '"Poppins", "Inter", sans-serif',
+          borderRadius: '999px',
           padding: '12px 32px',
+          minHeight: '44px',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
             transform: 'translateY(-2px)',
@@ -123,7 +131,7 @@ const getTheme = () => createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: '20px',
+          borderRadius: '28px',
           border: '1px solid rgba(226, 232, 240, 0.5)',
           boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -156,11 +164,11 @@ const getTheme = () => createTheme({
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#faf9f6',
       },
       contentArea: {
         flexGrow: 1,
-        padding: '40px 20px',
+        padding: 0,
       },
     },
     shadows: {
