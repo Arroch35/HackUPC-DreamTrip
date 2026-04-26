@@ -14,6 +14,7 @@ function Home() {
   const [results, setResults] = useState([]);
   const [interpreted, setInterpreted] = useState([]);
   const [error, setError] = useState(null);
+  
 
   console.log("STATE:", { loading, results, interpreted });
 
@@ -29,7 +30,7 @@ function Home() {
     setError(null);
 
     try {
-      const res = await fetch("/api/recommend", {
+      const res = await fetch("http://localhost:8000/recommend", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,6 +46,7 @@ function Home() {
 
       const data = await res.json();
 
+      // setResults(data.results || []);
       setResults(data.results || []);
       setInterpreted(data.interpreted || []);
     } catch (err) {
@@ -68,9 +70,22 @@ function Home() {
   // ------------------------
   // Handlers
   // ------------------------
-  const handleSubmit = () => {
-    console.log("SUBMIT CLICKED");
-    fetchRecommendations(query);
+const handleSubmit = (userQuery) => {
+  console.log("SUBMIT:", userQuery);
+
+  setQuery(userQuery); // 🔥 IMPORTANT
+  fetchRecommendations(userQuery);
+};
+
+  const handleAudioResult = (audioData) => {
+    setQuery(audioData?.query || "");
+    setResults(audioData?.results || []);
+    setInterpreted(audioData?.interpreted || []);
+    setError(null);
+  };
+
+  const handleAudioError = (message) => {
+    setError(message || "Audio transcription failed.");
   };
 
   const handleRefine = (newQuery) => {
@@ -98,6 +113,8 @@ function Home() {
           query={query}
           setQuery={setQuery}
           onSubmit={handleSubmit}
+          onAudioResult={handleAudioResult}
+          onAudioError={handleAudioError}
           isLoading={loading}
           error={error}
         />

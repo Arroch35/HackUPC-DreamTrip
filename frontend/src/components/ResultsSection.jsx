@@ -11,6 +11,30 @@ import {
 } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 
+const slugCity = (name) =>
+  (name || 'destination')
+    .toLowerCase()
+    .trim()
+    .replace(/[-\s]+/g, '_')
+    .replace(/[^a-z0-9_]/g, '');
+
+const resolveCitySlug = (name) => {
+  const slug = slugCity(name);
+  if (slug === 'bordeaux') return 'boardeaux';
+  return slug;
+};
+
+const buildLocalImageCandidates = (name) => {
+  const slug = resolveCitySlug(name);
+  const exts = ['jpeg', 'jpg', 'png', 'webp'];
+  const candidates = [];
+  for (const ext of exts) {
+    candidates.push(`http://localhost:8000/api/images/${slug}.${ext}`);
+    candidates.push(`http://localhost:8000/images/${slug}.${ext}`);
+  }
+  return candidates;
+};
+
 const buildImageUrl = (name, seed = 1) => {
   const safeName = encodeURIComponent(name || 'travel');
   return `https://source.unsplash.com/1200x700/?${safeName},travel&sig=${seed}`;
@@ -21,13 +45,13 @@ const buildFallbackImageUrl = (name, seed = 1) => {
   return `https://picsum.photos/seed/${safeName}-${seed}/1200/700`;
 };
 
-const ResultImage = ({ primarySrc, fallbackSrc, alt, sx }) => {
+const ResultImage = ({ primarySrc, fallbackSources, alt, sx }) => {
   const [currentSrc, setCurrentSrc] = React.useState(primarySrc);
-  const [usedFallback, setUsedFallback] = React.useState(false);
+  const [fallbackIndex, setFallbackIndex] = React.useState(0);
 
   React.useEffect(() => {
     setCurrentSrc(primarySrc);
-    setUsedFallback(false);
+    setFallbackIndex(0);
   }, [primarySrc]);
 
   return (
@@ -36,9 +60,9 @@ const ResultImage = ({ primarySrc, fallbackSrc, alt, sx }) => {
       image={currentSrc}
       alt={alt}
       onError={() => {
-        if (!usedFallback) {
-          setCurrentSrc(fallbackSrc);
-          setUsedFallback(true);
+        if (fallbackIndex < fallbackSources.length) {
+          setCurrentSrc(fallbackSources[fallbackIndex]);
+          setFallbackIndex((prev) => prev + 1);
         }
       }}
       sx={sx}
@@ -47,10 +71,20 @@ const ResultImage = ({ primarySrc, fallbackSrc, alt, sx }) => {
 };
 
 const DestinationResultCard = ({ destination, featured = false, onRefine, imageSeed = 1 }) => {
-  const name = destination?.name || destination?.title || 'Dream destination';
-  const description = destination?.description || 'A place where your dreams meet reality.';
-  const imageUrl = destination?.image || buildImageUrl(name, imageSeed);
-  const fallbackImageUrl = buildFallbackImageUrl(name, imageSeed);
+  // const name = destination?.name || destination?.title || 'Dream destination';
+  const name = destination?.city || 'Dream destination';
+  // const description = destination?.description || 'A place where your dreams meet reality.';
+  const description = destination?.key_features?.join(', ') || 'Great destination';
+  const localCandidates = buildLocalImageCandidates(name);
+  const imageUrl =
+    destination?.image && destination.image.includes('localhost:8000')
+      ? destination.image
+      : localCandidates[0];
+  const fallbackSources = [
+    ...localCandidates.slice(1),
+    buildImageUrl(name, imageSeed),
+    buildFallbackImageUrl(name, imageSeed),
+  ];
   const priceLabel = destination?.price ? `From $${destination.price}` : null;
 
   return (
@@ -81,7 +115,7 @@ const DestinationResultCard = ({ destination, featured = false, onRefine, imageS
       >
         <ResultImage
           primarySrc={imageUrl}
-          fallbackSrc={fallbackImageUrl}
+          fallbackSources={fallbackSources}
           alt={name}
           sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
@@ -108,7 +142,7 @@ const DestinationResultCard = ({ destination, featured = false, onRefine, imageS
           p: featured ? { xs: 1.4, sm: 1.8 } : { xs: 1.5, sm: 1.4 },
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1.2, mb: 1.2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', mb: 1.2 }}>
           <Typography
             variant={featured ? 'h5' : 'h6'}
             sx={{
@@ -118,6 +152,9 @@ const DestinationResultCard = ({ destination, featured = false, onRefine, imageS
             }}
           >
             {name}
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#64748b' }}>
+            {destination?.country}
           </Typography>
           {priceLabel && (
             <Chip
@@ -146,6 +183,17 @@ const DestinationResultCard = ({ destination, featured = false, onRefine, imageS
         >
           {description}
         </Typography>
+
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+          {destination?.key_features?.map((tag, i) => (
+            <Chip
+              key={i}
+              label={tag}
+              size="small"
+              sx={{ backgroundColor: '#f1f5f9' }}
+            />
+          ))}
+        </Box>
 
         <Button
           variant="contained"
