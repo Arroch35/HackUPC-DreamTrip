@@ -152,7 +152,7 @@ const submitQuery = async (textOverride = null, audioOverride = null) => {
           </Typography>
 
           <Typography variant="h5" sx={{ mb: 4 }}>
-            Tell us what you love — we&apos;ll find the perfect escape.
+            Tell us what you love, we&apos;ll find the perfect escape.
           </Typography>
 
           {/* FORM */}
