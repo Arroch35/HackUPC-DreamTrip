@@ -11,9 +11,9 @@ import MicIcon from '@mui/icons-material/Mic';
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80';
 
-const HeroInput = ({ onSubmit, isLoading, query, setQuery, error }) => {
+const HeroInput = ({ onSubmit, onAudioResult, onAudioError, isLoading, query, setQuery, error }) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [audioBlob, setAudioBlob] = useState(null);
+  const [isAudioProcessing, setIsAudioProcessing] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -30,6 +30,7 @@ const submitQuery = async (textOverride = null, audioOverride = null) => {
   try {
     // 🎤 AUDIO FLOW
     if (audioOverride) {
+      setIsAudioProcessing(true);
       const formData = new FormData();
       formData.append("file", audioOverride, "recording.webm");
 
@@ -38,12 +39,29 @@ const submitQuery = async (textOverride = null, audioOverride = null) => {
         body: formData,
       });
 
-      const data = await res.json();
+      if (!res.ok) {
+        let msg = "Audio request failed.";
+        try {
+          const errData = await res.json();
+          if (errData?.detail) {
+            msg = errData.detail;
+          }
+        } catch (_) {
+          // Ignore parse failures and keep fallback message.
+        }
+        throw new Error(msg);
+      }
 
+      const data = await res.json();
       const newQuery = data.query || "";
 
       if (newQuery) {
         setQuery(newQuery);
+      }
+
+      if (onAudioResult) {
+        onAudioResult(data);
+      } else if (newQuery) {
         onSubmit(newQuery);
       }
 
@@ -58,6 +76,13 @@ const submitQuery = async (textOverride = null, audioOverride = null) => {
     }
   } catch (err) {
     console.error(err);
+    if (onAudioError) {
+      onAudioError(err?.message || "Audio transcription failed.");
+    }
+  } finally {
+    if (audioOverride) {
+      setIsAudioProcessing(false);
+    }
   }
 };
 
@@ -79,8 +104,6 @@ const submitQuery = async (textOverride = null, audioOverride = null) => {
 
       recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-
-        setAudioBlob(blob);
 
         // 🔥 DIRECT SUBMIT (no waiting for React state)
         submitQuery(null, blob);
@@ -156,7 +179,7 @@ const submitQuery = async (textOverride = null, audioOverride = null) => {
             <Button
               type="submit"
               variant="contained"
-              disabled={isLoading}
+              disabled={isLoading || isAudioProcessing}
               sx={{
                 borderRadius: '999px',
                 px: 4,
@@ -170,6 +193,7 @@ const submitQuery = async (textOverride = null, audioOverride = null) => {
           {/* MIC BUTTON (NOT SUBMIT) */}
           <Button
             onClick={handleMicClick}
+            disabled={isLoading || isAudioProcessing}
             sx={{
               mt: 3,
               width: 55,
@@ -188,6 +212,12 @@ const submitQuery = async (textOverride = null, audioOverride = null) => {
           {isRecording && (
             <Typography sx={{ mt: 2, color: '#00D4FF' }}>
               🎤 Recording...
+            </Typography>
+          )}
+
+          {isAudioProcessing && (
+            <Typography sx={{ mt: 2, color: '#00D4FF' }}>
+              Processing audio...
             </Typography>
           )}
 

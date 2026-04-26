@@ -46,6 +46,7 @@ function Home() {
 
       const data = await res.json();
 
+      // setResults(data.results || []);
       setResults(data.results || []);
       setInterpreted(data.interpreted || []);
     } catch (err) {
@@ -75,6 +76,18 @@ const handleSubmit = (userQuery) => {
   setQuery(userQuery); // 🔥 IMPORTANT
   fetchRecommendations(userQuery);
 };
+
+  const handleAudioResult = (audioData) => {
+    setQuery(audioData?.query || "");
+    setResults(audioData?.results || []);
+    setInterpreted(audioData?.interpreted || []);
+    setError(null);
+  };
+
+  const handleAudioError = (message) => {
+    setError(message || "Audio transcription failed.");
+  };
+
   const handleRefine = (newQuery) => {
     setQuery(newQuery);
     fetchRecommendations(newQuery);
@@ -100,6 +113,8 @@ const handleSubmit = (userQuery) => {
           query={query}
           setQuery={setQuery}
           onSubmit={handleSubmit}
+          onAudioResult={handleAudioResult}
+          onAudioError={handleAudioError}
           isLoading={loading}
           error={error}
         />
