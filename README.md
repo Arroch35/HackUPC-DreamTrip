@@ -1,6 +1,6 @@
-# Travel Mirror
+# DreamTrip
 
-Travel Mirror is an AI-powered travel discovery app that turns vague emotions, constraints, and travel intent into personalized city recommendations, parallel trip realities, and decision-support planning.
+DreamTrip is an AI-powered travel discovery app that turns vague emotions, constraints, and travel intent into personalized city recommendations, parallel trip realities, and decision-support planning.
 
 It is designed to feel more like a travel mirror than a search engine: instead of asking users to define a destination, it helps them explore what kind of trip fits their mood, budget, and travel style.
 
@@ -8,7 +8,7 @@ It is designed to feel more like a travel mirror than a search engine: instead o
 
 ## What it does
 
-Travel Mirror takes a user prompt like:
+DreamTrip takes a user prompt like:
 
 > “I feel burnt out and want somewhere quiet and sunny.”
 
@@ -108,7 +108,7 @@ It is intentionally split from the frontend so the UI can stay simple and the mo
 
 ## Voice layer
 
-Travel Mirror includes a lightweight ElevenLabs voice layer for narrating the AI output.
+DreamTrip includes a lightweight ElevenLabs voice layer for narrating the AI output.
 
 ### Voice endpoint
 - `POST /api/voice/speak`
@@ -204,7 +204,7 @@ Invoke-RestMethod -Uri "http://localhost:8000/api/voice/status" -Method GET
 Invoke-WebRequest -Uri "http://localhost:8000/api/voice/speak" `
   -Method POST `
   -ContentType "application/json" `
-  -Body '{"text":"Welcome to Travel Mirror."}' `
+  -Body '{"text":"Welcome to DreamTrip."}' `
   -OutFile "output.mp3"
 ```
 
@@ -212,7 +212,7 @@ Invoke-WebRequest -Uri "http://localhost:8000/api/voice/speak" `
 
 ## Demo story
 
-Travel Mirror helps users discover travel by emotion, not just by destination.
+DreamTrip helps users discover travel by emotion, not just by destination.
 
 Instead of asking “Where do you want to go?”, it helps answer:
 - “What kind of trip fits how you feel?”
@@ -252,4 +252,4 @@ For hackathon/demo use only unless otherwise specified.
 ---
 ## Credits
 
-Built by the Travel Mirror team for HackUPC.
+Built by the DreamTrip team for HackUPC.
